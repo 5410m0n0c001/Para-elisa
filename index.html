@@ -173,9 +173,29 @@
   const ctaButton = document.getElementById('ctaButton');
   const YOUTUBE_ID = '8izCDi7d2V8';
 
+  function requestFS(el) {
+    try {
+      if (el.requestFullscreen) {
+        const p = el.requestFullscreen();
+        if (p && p.catch) p.catch(() => {});
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      } else if (el.webkitRequestFullScreen) {
+        el.webkitRequestFullScreen();
+      } else if (el.mozRequestFullScreen) {
+        el.mozRequestFullScreen();
+      } else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen();
+      }
+    } catch (e) {}
+  }
+
   ctaButton.addEventListener('click', () => {
     if (stage.classList.contains('playing')) return;
     stage.classList.add('playing');
+
+    // pedir pantalla completa como primera accion dentro del gesto del usuario
+    requestFS(stage);
 
     const iframe = document.createElement('iframe');
     iframe.src = `https://www.youtube.com/embed/${YOUTUBE_ID}?autoplay=1&rel=0&playsinline=1`;
@@ -183,13 +203,11 @@
     iframe.setAttribute('allowfullscreen', '');
     iframe.title = 'Video';
     videoWrap.appendChild(iframe);
+  });
 
-    const fsTarget = document.documentElement;
-    if (fsTarget.requestFullscreen) {
-      fsTarget.requestFullscreen().catch(() => {});
-    } else if (fsTarget.webkitRequestFullscreen) {
-      fsTarget.webkitRequestFullscreen();
-    }
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) stage.classList.remove('fullscreened');
+    else stage.classList.add('fullscreened');
   });
 </script>
 
